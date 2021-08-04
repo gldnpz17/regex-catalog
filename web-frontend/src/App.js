@@ -1,24 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+import { createTheme, ThemeProvider } from "@material-ui/core";
+import { deepPurple, grey, teal } from "@material-ui/core/colors";
+import Navbar from "./components/navbar"
+import HomePage from "./pages/home-page"
 
-function App() {
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: teal[500],
+      contrastText: grey[50],
+      light: teal[50]
+    },
+    secondary: {
+      main: deepPurple[500]
+    }
+  }
+})
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <ThemeProvider theme={theme}>
+        <Navbar />
+        <HomePage />
+      </ThemeProvider>
+    </>
   );
 }
 
