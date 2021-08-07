@@ -1,0 +1,19 @@
+# Docker-related.
+**/.dockerignore
+**/Dockerfile
+
+# git-related.
+**/.git
+**/.gitignore
+
+# IDE-related.
+**/.vs
+**/.vscode
+
+# node-specific
+**/node_modules
+/web-frontend/build
+/backend/dist
+
+#sensitive
+**/.env
