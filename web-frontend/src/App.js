@@ -2,7 +2,6 @@ import { createTheme, ThemeProvider } from "@material-ui/core";
 import { deepPurple, grey, teal } from "@material-ui/core/colors";
 import { useState } from "react";
 import Navbar from "./components/navbar"
-import LoginDialog from "./dialogs/login-dialog";
 import HomePage from "./pages/home-page"
 
 const theme = createTheme({

@@ -1,0 +1,40 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type CommentModel {
+  comment: String!
+  commenter: String!
+  created: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  createComment(comment: String!, commentAs: String!, entryId: String!): CommentModel!
+  createEntry(description: String!, regex: String!, title: String!): RegexEntryModel!
+  editEntry(description: String!, entryId: String!, regex: String!, title: String!): RegexEntryModel!
+}
+
+type Query {
+  regexEntries(count: Int, id: String, keywords: String, start: Int): [RegexEntryModel!]
+  regexEntryStats(keywords: String!): RegexEntryStatModel!
+}
+
+type RegexEntryModel {
+  commentCount: Int!
+  comments: [CommentModel!]!
+  created: DateTime!
+  description: String!
+  id: String!
+  lastEdited: DateTime!
+  regex: String!
+  title: String!
+}
+
+type RegexEntryStatModel {
+  totalItems: Int!
+}
