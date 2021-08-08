@@ -35,6 +35,8 @@ import { RegexEntryUseCases } from './use-cases/regex-entry-use-cases';
           database: config.get<string>('MONGODB_DATABASE'),
           username: config.get<string>('MONGODB_USERNAME'),
           password: config.get<string>('MONGODB_PASSWORD'),
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
           ssl: process.env.APPLICATION_ENV === 'Production',
           entities: [RegexEntry, Comment]
         })
