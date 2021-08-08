@@ -30,11 +30,7 @@ import { RegexEntryUseCases } from './use-cases/regex-entry-use-cases';
       useFactory: (config: ConfigService) => {
         return ({
           type: 'mongodb',
-          host: config.get<string>('MONGODB_HOST'),
-          port: Number.parseInt(config.get<string>('MONGODB_PORT')),
-          database: config.get<string>('MONGODB_DATABASE'),
-          username: config.get<string>('MONGODB_USERNAME'),
-          password: config.get<string>('MONGODB_PASSWORD'),
+          url: config.get<string>('MONGODB_CONNECTION_STRING'),
           useNewUrlParser: true,
           useUnifiedTopology: true,
           ssl: process.env.APPLICATION_ENV === 'Production',
