@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
+import { MongooseModule } from '@nestjs/mongoose';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Comment } from './entities/comment';
-import { RegexEntry } from './entities/regex-entry';
+import { RegexEntry, RegexEntrySchema } from './entities/regex-entry';
 import { RegexEntryStatResolver } from './graphql/resolvers/regex-entry-stat.resolver';
 import { RegexEntryResolver } from './graphql/resolvers/regex-entry.resolver';
 import { DateTimeServiceImplementation } from './service-implementations/datetime-service-implementation';
@@ -24,19 +25,18 @@ import { RegexEntryUseCases } from './use-cases/regex-entry-use-cases';
       autoSchemaFile: join(process.cwd(), 'src/graphql/schema/schema.gql'),
       sortSchema: true
     }),
-    TypeOrmModule.forRootAsync({
+    MongooseModule.forFeature([
+      {
+        name: RegexEntry.name,
+        schema: RegexEntrySchema
+      }
+    ]),
+    MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        return ({
-          type: 'mongodb',
-          url: config.get<string>('MONGODB_CONNECTION_STRING'),
-          useNewUrlParser: true,
-          useUnifiedTopology: true,
-          ssl: process.env.APPLICATION_ENV === 'Production',
-          entities: [RegexEntry, Comment]
-        })
-      }
+      useFactory: (config: ConfigService) => ({
+        uri: config.get<string>('MONGODB_CONNECTION_STRING')
+      })
     }),
     ServeStaticModule.forRootAsync({
       imports: [ConfigModule],
@@ -44,7 +44,7 @@ import { RegexEntryUseCases } from './use-cases/regex-entry-use-cases';
       useFactory: (config: ConfigService) => {
         if (config.get<string>('APPLICATION_ENV') === 'Production') {
           return ([{
-            rootPath: join(process.cwd(), '..', '..', 'web-frontend', 'build')
+            rootPath: join(process.cwd(), '..', 'web-frontend', 'build')
           }])
         } else {
           return [];

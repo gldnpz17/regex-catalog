@@ -26,6 +26,7 @@
     "@nestjs/config": "^1.0.1",
     "@nestjs/core": "^8.0.0",
     "@nestjs/graphql": "^8.0.2",
+    "@nestjs/mongoose": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/serve-static": "^2.2.2",
     "@nestjs/typeorm": "^8.0.2",
@@ -34,10 +35,10 @@
     "apollo-server-express": "^2.25.2",
     "graphql": "^15.5.1",
     "mongodb": "^3.6.10",
+    "mongoose": "^5.13.5",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
-    "rxjs": "^7.2.0",
-    "typeorm": "^0.2.36"
+    "rxjs": "^7.2.0"
   },
   "devDependencies": {
     "@nestjs/schematics": "^8.0.0",

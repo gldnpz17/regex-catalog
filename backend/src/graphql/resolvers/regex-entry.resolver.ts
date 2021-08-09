@@ -1,4 +1,5 @@
 import { Args, Mutation, Parent, Query, ResolveField, Resolver } from "@nestjs/graphql";
+import { model } from "mongoose";
 import { RegexEntry } from "src/entities/regex-entry";
 import { RegexEntryUseCases } from "src/use-cases/regex-entry-use-cases";
 import { CreateCommentArgs } from "../input-types/create-comment.args";
@@ -31,12 +32,13 @@ export class RegexEntryResolver {
     let output = results.map(result => {
       let model: RegexEntryModel = {
         ...result,
-        commentCount: result.comments.length,
-        id: result._id.toString()
+        commentCount: result.comments.length
       }
 
       return model;
     });
+
+    console.log(output[0])
 
     return output;
   }
@@ -47,8 +49,7 @@ export class RegexEntryResolver {
 
     return ({
       ...result,
-      commentCount: result.comments.length,
-      id: result._id.toString()
+      commentCount: result.comments.length
     });
   }
 
@@ -58,8 +59,7 @@ export class RegexEntryResolver {
 
     return ({
       ...result,
-      commentCount: result.comments.length,
-      id: result._id.toString()
+      commentCount: result.comments.length
     });
   }
 

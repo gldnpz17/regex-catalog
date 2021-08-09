@@ -1,29 +1,47 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { InjectConnection, InjectRepository } from "@nestjs/typeorm";
+import { InjectModel } from "@nestjs/mongoose";
+import { InjectConnection, InjectEntityManager, InjectRepository } from "@nestjs/typeorm";
+import { Document, Model } from "mongoose";
 import { Comment } from "src/entities/comment";
-import { RegexEntry } from "src/entities/regex-entry";
+import { MongoEntityBase } from "src/entities/mongo-entity-base";
+import { RegexEntry, RegexEntryDocument } from "src/entities/regex-entry";
 import { CreateCommentArgs } from "src/graphql/input-types/create-comment.args";
 import { CreateEntryArgs } from "src/graphql/input-types/create-entry.args";
 import { EditEntryArgs } from "src/graphql/input-types/edit-entry.args";
 import { DatetimeService, DATETIME_SERVICE } from "src/services/datetime-service";
-import { Connection, MongoRepository, Repository } from "typeorm";
-import { ObjectID } from 'mongodb';
 
 @Injectable()
 export class RegexEntryUseCases {
-  private regexEntryRepository: MongoRepository<RegexEntry>;
-
   constructor(
-    @InjectConnection() connection: Connection,
+    @InjectModel(RegexEntry.name) private regexEntryModel: Model<RegexEntryDocument>,
     @Inject(DATETIME_SERVICE) private datetimeService: DatetimeService
   ) {
-    this.regexEntryRepository = connection.getMongoRepository(RegexEntry);
+
   }
 
   async getTotalItems(keywords: string): Promise<number> {
     let searchRegex = this.constructSearchRegex(keywords);
 
-    return await this.regexEntryRepository.count({
+    return this.regexEntryModel.find({
+      $or: [
+        {
+          title: { $regex: searchRegex, $options: 'i' }
+        },
+        {
+          description: { $regex: searchRegex, $options: 'i' }
+        }
+      ]
+    }).countDocuments().exec();
+  }
+
+  async readRegexEntry(entryId: string): Promise<RegexEntry> {
+    return this.documentToEntity(await this.regexEntryModel.findById(entryId).exec());
+  }
+
+  async readAllEntries(start: number, count: number, keywords: string): Promise<RegexEntry[]> {
+    let searchRegex = this.constructSearchRegex(keywords);
+
+    let results = await this.regexEntryModel.find({
       $or: [
         { 
           title: { $regex: searchRegex, $options: 'i' } 
@@ -32,47 +50,24 @@ export class RegexEntryUseCases {
           description: { $regex: searchRegex, $options: 'i' }
         }
       ]
-    });
-  }
+    }).skip(start).limit(count).exec();
 
-  async readRegexEntry(entryId: string): Promise<RegexEntry> {
-    return await this.regexEntryRepository.findOne({ _id: new ObjectID(entryId) });
-  }
-
-  async readAllEntries(start: number, count: number, keywords: string): Promise<RegexEntry[]> {
-    let searchRegex = this.constructSearchRegex(keywords);
-
-    let results = await this.regexEntryRepository.find({ 
-      where: {
-        $or: [
-          { 
-            title: { $regex: searchRegex, $options: 'i' } 
-          },
-          {
-            description: { $regex: searchRegex, $options: 'i' }
-          }
-        ]
-      },
-      skip: start,
-      take: count
-    });
-
-    return results;
+    return results.map(result => this.documentToEntity(result));
   }
 
   async createEntry(input: CreateEntryArgs): Promise<RegexEntry> {
-    let newEntry = new RegexEntry();
+    let newEntry = new this.regexEntryModel();
     newEntry.title = input.title;
     newEntry.regex = input.regex;
     newEntry.description = input.description;
     
     newEntry.created = newEntry.lastEdited = this.datetimeService.getCurrentDatetime();
 
-    return await this.regexEntryRepository.save(newEntry);
+    return this.documentToEntity(await newEntry.save());
   }
 
   async editEntry(input: EditEntryArgs): Promise<RegexEntry> {
-    let entry = await this.regexEntryRepository.findOne({ _id: new ObjectID(input.entryId) });
+    let entry = await this.regexEntryModel.findById(input.entryId).exec();
 
     if (entry) {
       entry.title = input.title;
@@ -81,14 +76,14 @@ export class RegexEntryUseCases {
       
       entry.lastEdited = this.datetimeService.getCurrentDatetime();
 
-      return await this.regexEntryRepository.save(entry);
+      return this.documentToEntity(await entry.save());
     } else {
       return null;
     }
   }
 
   async comment(input: CreateCommentArgs): Promise<Comment> {
-    let entry = await this.regexEntryRepository.findOne({ _id: new ObjectID(input.entryId) });
+    let entry = await this.regexEntryModel.findById(input.entryId).exec();
 
     if (entry) {
       let newComment = new Comment();
@@ -99,7 +94,7 @@ export class RegexEntryUseCases {
 
       entry.comments.push(newComment);
 
-      await this.regexEntryRepository.save(entry);
+      await entry.save();
 
       return newComment;
     }
@@ -109,5 +104,14 @@ export class RegexEntryUseCases {
 
   private constructSearchRegex(keywords: string): string {
     return keywords.split(' ').map(keyword => `(${keyword})`).join('|');
+  }
+
+  private documentToEntity(document: RegexEntryDocument): RegexEntry {
+    let { _id, __v, ...object } = document.toObject();
+
+    return ({
+      ...object,
+      id: _id
+    });
   }
 }

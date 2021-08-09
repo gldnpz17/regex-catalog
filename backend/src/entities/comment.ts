@@ -1,12 +1,12 @@
-import { Column, Entity, ObjectID, ObjectIdColumn } from "typeorm";
+import { Prop } from "@nestjs/mongoose";
 
 export class Comment {
-  @Column()
+  @Prop()
   commenter: string;
 
-  @Column()
+  @Prop()
   comment: string;
 
-  @Column()
+  @Prop()
   created: Date;
 }

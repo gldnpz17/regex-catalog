@@ -1,31 +1,29 @@
-import { BeforeInsert, Column, Entity, ObjectID, ObjectIdColumn } from "typeorm";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document } from "mongoose";
 import { Comment } from "./comment";
+import { MongoEntityBase } from "./mongo-entity-base";
 
-@Entity()
-export class RegexEntry {
-  @ObjectIdColumn()
-  _id: ObjectID;
+export type RegexEntryDocument = RegexEntry & Document;
 
-  @Column()
+@Schema()
+export class RegexEntry extends MongoEntityBase {
+  @Prop()
   title: string;
 
-  @Column()
+  @Prop()
   regex: string;
 
-  @Column()
+  @Prop()
   description: string;
 
-  @Column()
+  @Prop()
   created: Date;
 
-  @Column()
+  @Prop()
   lastEdited: Date;
 
-  @Column(() => Comment)
-  comments: Comment[];
-
-  @BeforeInsert()
-  beforeInserActions() {
-    this.comments = [];
-  }
+  @Prop([Comment])
+  comments: Comment[] = [];
 }
+
+export const RegexEntrySchema = SchemaFactory.createForClass(RegexEntry);
