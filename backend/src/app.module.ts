@@ -44,10 +44,12 @@ import { RegexEntryUseCases } from './use-cases/regex-entry-use-cases';
       useFactory: (config: ConfigService) => {
         if (config.get<string>('APPLICATION_ENV') === 'Production') {
           return ([{
+            rootPath: join(process.cwd(), '..', '..', 'web-frontend', 'build')
+          }]);
+        } else {
+          return ([{
             rootPath: join(process.cwd(), '..', 'web-frontend', 'build')
           }])
-        } else {
-          return [];
         }
       }
     })
